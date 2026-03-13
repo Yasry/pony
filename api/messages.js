@@ -2,6 +2,10 @@ const { Redis } = require("@upstash/redis");
 
 const ADDITIONS_KEY = "pony:additions";
 const CUSTOM_KEY = "pony:custom";
+const COUNT_TOTAL_KEY = "pony:count:total";
+const COUNT_DAY_PREFIX = "pony:count:day:";
+const COUNT_WEEK_PREFIX = "pony:count:week:";
+const COUNT_MONTH_PREFIX = "pony:count:month:";
 
 function getRedis() {
   const url = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
@@ -30,6 +34,58 @@ function toObject(value) {
   return null;
 }
 
+function formatDayKey(date) {
+  const y = date.getUTCFullYear();
+  const m = String(date.getUTCMonth() + 1).padStart(2, "0");
+  const d = String(date.getUTCDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+function formatMonthKey(date) {
+  const y = date.getUTCFullYear();
+  const m = String(date.getUTCMonth() + 1).padStart(2, "0");
+  return `${y}-${m}`;
+}
+
+function getISOWeekKey(date) {
+  const tmp = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+  const dayNum = tmp.getUTCDay() || 7;
+  tmp.setUTCDate(tmp.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(tmp.getUTCFullYear(), 0, 1));
+  const weekNo = Math.ceil((((tmp - yearStart) / 86400000) + 1) / 7);
+  return `${tmp.getUTCFullYear()}-W${String(weekNo).padStart(2, "0")}`;
+}
+
+function getCounterKeys(nowDate) {
+  const prevMonth = new Date(Date.UTC(nowDate.getUTCFullYear(), nowDate.getUTCMonth() - 1, 1));
+
+  return {
+    total: COUNT_TOTAL_KEY,
+    today: `${COUNT_DAY_PREFIX}${formatDayKey(nowDate)}`,
+    week: `${COUNT_WEEK_PREFIX}${getISOWeekKey(nowDate)}`,
+    currentMonth: `${COUNT_MONTH_PREFIX}${formatMonthKey(nowDate)}`,
+    prevMonth: `${COUNT_MONTH_PREFIX}${formatMonthKey(prevMonth)}`
+  };
+}
+
+async function readCounters(redis, nowDate) {
+  const keys = getCounterKeys(nowDate);
+
+  const [total, today, week, prevMonth] = await Promise.all([
+    redis.get(keys.total),
+    redis.get(keys.today),
+    redis.get(keys.week),
+    redis.get(keys.prevMonth)
+  ]);
+
+  return {
+    addsTotal: Number(total) || 0,
+    addsToday: Number(today) || 0,
+    addsWeek: Number(week) || 0,
+    addsPrevMonth: Number(prevMonth) || 0
+  };
+}
+
 module.exports = async function handler(req, res) {
   const redis = getRedis();
 
@@ -40,10 +96,12 @@ module.exports = async function handler(req, res) {
 
   if (req.method === "GET") {
     try {
+      const nowDate = new Date();
       const [rawAdditions, rawCustom] = await Promise.all([
         redis.lrange(ADDITIONS_KEY, 0, 299),
         redis.lrange(CUSTOM_KEY, 0, -1)
       ]);
+      const counters = await readCounters(redis, nowDate);
 
       const additionLogs = (rawAdditions || [])
         .map(toObject)
@@ -59,7 +117,7 @@ module.exports = async function handler(req, res) {
           message: String(item.message).slice(0, 280)
         }));
 
-      res.status(200).json({ additionLogs, customLogs });
+      res.status(200).json({ additionLogs, customLogs, counters });
       return;
     } catch (error) {
       res.status(500).json({ error: "fetch_failed" });
@@ -78,15 +136,25 @@ module.exports = async function handler(req, res) {
 
     try {
       if (type === "addition") {
+        const nowDate = new Date();
+        const counterKeys = getCounterKeys(nowDate);
         const entry = {
           id: typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}_${Math.random()}`,
           ts: Date.now()
         };
 
-        await redis.lpush(ADDITIONS_KEY, entry);
-        await redis.ltrim(ADDITIONS_KEY, 0, 999);
+        await Promise.all([
+          redis.lpush(ADDITIONS_KEY, entry),
+          redis.ltrim(ADDITIONS_KEY, 0, 999),
+          redis.incr(counterKeys.total),
+          redis.incr(counterKeys.today),
+          redis.incr(counterKeys.week),
+          redis.incr(counterKeys.currentMonth)
+        ]);
 
-        res.status(200).json({ ok: true, entry });
+        const counters = await readCounters(redis, nowDate);
+
+        res.status(200).json({ ok: true, entry, counters });
         return;
       }
 

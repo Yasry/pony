@@ -1032,8 +1032,6 @@
   </div>
 
   <script>
-    const API_BASE = "https://api.countapi.xyz";
-    const NAMESPACE = "pony_modh8_live_stats";
     const MESSAGES_API = "/api/messages";
 
     const addsTotalEl = document.getElementById("addsTotal");
@@ -1336,42 +1334,14 @@
       });
     };
 
-    const formatDateKey = (date) => {
-      const y = date.getFullYear();
-      const m = String(date.getMonth() + 1).padStart(2, "0");
-      const d = String(date.getDate()).padStart(2, "0");
-      return `${y}-${m}-${d}`;
-    };
+    const applyServerCounters = (counters, durationBase) => {
+      if (!counters || typeof counters !== "object") return;
 
-    const formatMonthKey = (date) => {
-      const y = date.getFullYear();
-      const m = String(date.getMonth() + 1).padStart(2, "0");
-      return `${y}-${m}`;
-    };
-
-    const getISOWeekKey = (date) => {
-      const tmp = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-      const dayNum = tmp.getUTCDay() || 7;
-      tmp.setUTCDate(tmp.getUTCDate() + 4 - dayNum);
-      const yearStart = new Date(Date.UTC(tmp.getUTCFullYear(), 0, 1));
-      const weekNo = Math.ceil((((tmp - yearStart) / 86400000) + 1) / 7);
-      return `${tmp.getUTCFullYear()}-W${String(weekNo).padStart(2, "0")}`;
-    };
-
-    const getPrevMonthDate = () => {
-      const now = new Date();
-      return new Date(now.getFullYear(), now.getMonth() - 1, 1);
-    };
-
-    const keyMap = () => {
-      const now = new Date();
-      return {
-        addsTotal: "adds_total",
-        addsToday: `adds_day_${formatDateKey(now)}`,
-        addsWeek: `adds_week_${getISOWeekKey(now)}`,
-        addsMonth: `adds_month_${formatMonthKey(now)}`,
-        addsPrevMonth: `adds_month_${formatMonthKey(getPrevMonthDate())}`
-      };
+      const base = durationBase || 720;
+      rollCounterTo(addsTotalEl, Number(counters.addsTotal) || 0, base + 100);
+      rollCounterTo(addsTodayEl, Number(counters.addsToday) || 0, base);
+      rollCounterTo(addsWeekEl, Number(counters.addsWeek) || 0, base + 40);
+      rollCounterTo(addsPrevMonthEl, Number(counters.addsPrevMonth) || 0, base + 140);
     };
 
     const setStatus = (text, warning) => {
@@ -1490,6 +1460,7 @@
         const data = await res.json();
         additionLogs = normalizeAdditionLogs(data.additionLogs);
         customLogs = normalizeCustomLogs(data.customLogs);
+        applyServerCounters(data.counters, 820);
         return true;
       } catch (error) {
         return false;
@@ -1511,7 +1482,7 @@
         }
 
         const data = await res.json();
-        return data.entry || null;
+        return data || null;
       } catch (error) {
         return null;
       }
@@ -1595,57 +1566,16 @@
       customDialog.setAttribute("aria-hidden", "true");
     };
 
-    const getCounter = async (key) => {
-      try {
-        const res = await fetch(`${API_BASE}/get/${NAMESPACE}/${key}`);
-        if (!res.ok) {
-          return 0;
-        }
-        const data = await res.json();
-        return Number.isFinite(data.value) ? data.value : 0;
-      } catch (error) {
-        return 0;
-      }
-    };
-
-    const hitCounter = async (key) => {
-      const res = await fetch(`${API_BASE}/hit/${NAMESPACE}/${key}`);
-      if (!res.ok) {
-        throw new Error("counter_hit_failed");
-      }
-      const data = await res.json();
-      return Number.isFinite(data.value) ? data.value : 0;
-    };
-
-    const refreshAddStats = async () => {
-      const keys = keyMap();
-      const [addsTotal, addsToday, addsWeek, addsPrevMonth] = await Promise.all([
-        getCounter(keys.addsTotal),
-        getCounter(keys.addsToday),
-        getCounter(keys.addsWeek),
-        getCounter(keys.addsPrevMonth)
-      ]);
-
-      rollCounterTo(addsTotalEl, addsTotal, 820);
-      rollCounterTo(addsTodayEl, addsToday, 720);
-      rollCounterTo(addsWeekEl, addsWeek, 780);
-      rollCounterTo(addsPrevMonthEl, addsPrevMonth, 860);
-    };
-
     const init = async () => {
       setStatus("جاري تحميل الإحصائيات...");
       const loaded = await fetchLogsFromServer();
       if (!loaded) {
         setStatus("فشل", true);
+        return;
       }
       renderLogItems(additionLogs.slice(0, MAX_LOG_ITEMS), false);
       renderCustomLogItems(customLogs, false);
-      try {
-        await refreshAddStats();
-        setStatus("Online");
-      } catch (error) {
-        setStatus("فشل", true);
-      }
+      setStatus("Online");
     };
 
     setInterval(async () => {
@@ -1683,9 +1613,9 @@
           return;
         }
 
-        const entry = await postLogToServer({ type: "custom", message });
-        if (entry) {
-          pushCustomLogItem(entry);
+        const response = await postLogToServer({ type: "custom", message });
+        if (response && response.entry) {
+          pushCustomLogItem(response.entry);
           playRetroSend();
         } else {
           setStatus("فشل", true);
@@ -1705,25 +1635,17 @@
     });
 
     addBtn.addEventListener("click", async () => {
-      const keys = keyMap();
       addBtn.disabled = true;
       setStatus("عيرك بالطريق");
 
       try {
-        const [addsTotal, addsToday, addsWeek] = await Promise.all([
-          hitCounter(keys.addsTotal),
-          hitCounter(keys.addsToday),
-          hitCounter(keys.addsWeek)
-        ]);
+        const response = await postLogToServer({ type: "addition" });
+        if (!response || !response.entry) {
+          throw new Error("addition_failed");
+        }
 
-        // Keeps current-month data available for future month-over-month analytics.
-        await hitCounter(keys.addsMonth);
-
-        rollCounterTo(addsTotalEl, addsTotal, 600);
-        rollCounterTo(addsTodayEl, addsToday, 520);
-        rollCounterTo(addsWeekEl, addsWeek, 560);
-        const entry = await postLogToServer({ type: "addition" });
-        pushLogItem(entry || { ts: Date.now() });
+        pushLogItem(response.entry);
+        applyServerCounters(response.counters, 620);
         playRetroSend();
         setStatus("عيرك وصل");
       } catch (error) {

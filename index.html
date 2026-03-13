@@ -1,0 +1,1741 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pony Dickker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&family=VT323&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-1: #050305;
+      --bg-2: #110712;
+      --panel: #160d18;
+      --panel-soft: #1d1021;
+      --line: #6b2f61;
+      --text: #ffe4fb;
+      --muted: #d7a2cb;
+      --hot-pink: #ff4fd8;
+      --pink-soft: #ff9bee;
+      --danger: #ff7e9f;
+      --ok: #89ffd5;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: "Cairo", Tahoma, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(900px 500px at 0% 0%, rgba(255, 79, 216, 0.22), transparent 60%),
+        radial-gradient(1000px 620px at 100% 100%, rgba(255, 155, 238, 0.12), transparent 60%),
+        linear-gradient(160deg, var(--bg-1), var(--bg-2));
+      display: grid;
+      place-items: center;
+      padding: 28px 16px;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 3;
+      background:
+        repeating-linear-gradient(
+          to bottom,
+          rgba(0, 0, 0, 0) 0px,
+          rgba(0, 0, 0, 0) 2px,
+          rgba(0, 0, 0, 0.26) 3px,
+          rgba(0, 0, 0, 0.26) 4px
+        );
+      mix-blend-mode: soft-light;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 3;
+      opacity: 0.06;
+      background:
+        radial-gradient(#ffffff 0.7px, transparent 0.7px);
+      background-size: 3px 3px;
+    }
+
+    .app {
+      width: min(980px, 100%);
+      border: 2px solid var(--line);
+      border-radius: 10px;
+      background: linear-gradient(180deg, rgba(22, 13, 24, 0.96), rgba(12, 8, 14, 0.96));
+      box-shadow:
+        0 0 0 2px rgba(0, 0, 0, 0.5) inset,
+        0 0 24px rgba(255, 79, 216, 0.22),
+        0 30px 60px rgba(0, 0, 0, 0.55);
+      padding: clamp(18px, 4vw, 34px);
+      padding-top: clamp(46px, 6vw, 62px);
+      animation: rise 700ms ease both, flicker 4s linear infinite;
+      position: relative;
+      z-index: 2;
+    }
+
+    .hud-bar {
+      position: absolute;
+      top: 0;
+      left: 12px;
+      right: 12px;
+      transform: translateY(-50%);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      z-index: 5;
+    }
+
+    .terminal-chip {
+      display: inline-block;
+      font-family: "VT323", monospace;
+      font-size: 24px;
+      letter-spacing: 1px;
+      color: var(--pink-soft);
+      border: 1px solid var(--line);
+      background: rgba(0, 0, 0, 0.35);
+      padding: 2px 10px;
+      border-radius: 4px;
+    }
+
+    .app::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(120deg, rgba(255, 255, 255, 0.04), transparent 32%);
+      pointer-events: none;
+    }
+
+    .hero {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+
+    .hero-head {
+      min-width: 220px;
+    }
+
+    .total-hero {
+      width: min(280px, 100%);
+      position: relative;
+      border: 2px solid #ff8de9;
+      background:
+        linear-gradient(135deg, rgba(73, 29, 71, 0.96), rgba(31, 13, 35, 0.96));
+      box-shadow:
+        0 0 0 2px rgba(255, 208, 250, 0.3) inset,
+        0 0 24px rgba(255, 79, 216, 0.34),
+        0 12px 28px rgba(0, 0, 0, 0.45);
+      overflow: hidden;
+      clip-path: polygon(10px 0, calc(100% - 10px) 0, 100% 10px, 100% calc(100% - 10px), calc(100% - 10px) 100%, 10px 100%, 0 calc(100% - 10px), 0 10px);
+      transform: perspective(800px) rotateY(-3deg);
+    }
+
+    .total-hero::before {
+      content: "PRIORITY";
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      font-family: "VT323", monospace;
+      font-size: 17px;
+      color: #fff2fd;
+      border: 1px solid rgba(255, 200, 248, 0.7);
+      background: linear-gradient(180deg, rgba(255, 123, 226, 0.45), rgba(130, 39, 108, 0.5));
+      padding: 1px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.8px;
+    }
+
+    .total-hero::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        repeating-linear-gradient(
+          -45deg,
+          rgba(255, 179, 243, 0.08) 0,
+          rgba(255, 179, 243, 0.08) 6px,
+          rgba(0, 0, 0, 0) 6px,
+          rgba(0, 0, 0, 0) 12px
+        );
+      pointer-events: none;
+    }
+
+    .total-hero .value {
+      font-size: clamp(38px, 7vw, 58px);
+      color: #ffe7fd;
+      text-shadow: 0 0 18px rgba(255, 123, 226, 0.65);
+      letter-spacing: 1.2px;
+    }
+
+    .total-hero h3 {
+      color: #f3b7e7;
+      border-bottom-color: rgba(255, 177, 241, 0.48);
+    }
+
+    .actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 4px;
+    }
+
+    .pony-dancer {
+      width: 112px;
+      height: 92px;
+      position: relative;
+      margin-inline-start: 8px;
+      transform-origin: 50% 80%;
+      animation: ponyDance 0.72s ease-in-out infinite;
+      filter: drop-shadow(0 0 16px rgba(255, 120, 221, 0.62));
+      pointer-events: none;
+    }
+
+    .pony-body {
+      position: absolute;
+      bottom: 22px;
+      left: 20px;
+      width: 54px;
+      height: 32px;
+      border: 2px solid #fcb3ea;
+      border-radius: 12px 14px 10px 10px;
+      background: linear-gradient(180deg, #8f2f7f, #4f1b47);
+      box-shadow: 0 0 10px rgba(255, 91, 210, 0.3) inset;
+    }
+
+    .pony-head {
+      position: absolute;
+      bottom: 42px;
+      left: 62px;
+      width: 28px;
+      height: 24px;
+      border: 2px solid #ffd2f6;
+      border-radius: 11px 11px 9px 9px;
+      background: linear-gradient(180deg, #a13b8f, #612458);
+    }
+
+    .pony-head::before {
+      content: "";
+      position: absolute;
+      left: 7px;
+      top: 7px;
+      width: 5px;
+      height: 5px;
+      border-radius: 999px;
+      background: #8affde;
+      box-shadow: 0 0 6px rgba(138, 255, 222, 0.8);
+    }
+
+    .pony-ear {
+      position: absolute;
+      bottom: 59px;
+      left: 70px;
+      width: 0;
+      height: 0;
+      border-left: 7px solid transparent;
+      border-right: 6px solid transparent;
+      border-bottom: 14px solid #ff9ee9;
+      transform: rotate(-10deg);
+    }
+
+    .pony-mane {
+      position: absolute;
+      bottom: 47px;
+      left: 56px;
+      width: 24px;
+      height: 14px;
+      border-radius: 10px;
+      background: linear-gradient(90deg, #49ffe1, #ff78dd);
+      transform: rotate(-18deg);
+      opacity: 0.95;
+    }
+
+    .pony-tail {
+      position: absolute;
+      bottom: 40px;
+      left: 6px;
+      width: 24px;
+      height: 10px;
+      border-radius: 10px;
+      background: linear-gradient(90deg, #ff78dd, #4fffe1);
+      transform-origin: 100% 50%;
+      animation: tailWag 0.22s ease-in-out infinite alternate;
+    }
+
+    .pony-leg {
+      position: absolute;
+      bottom: 9px;
+      width: 10px;
+      height: 22px;
+      border: 2px solid #fcb3ea;
+      border-radius: 4px;
+      background: linear-gradient(180deg, #7f2d72, #43173d);
+      transform-origin: 50% 0;
+    }
+
+    .pony-leg.l1 { left: 24px; animation: legA 0.24s ease-in-out infinite alternate; }
+    .pony-leg.l2 { left: 40px; animation: legB 0.24s ease-in-out infinite alternate; }
+    .pony-leg.l3 { left: 56px; animation: legB 0.24s ease-in-out infinite alternate; }
+    .pony-leg.l4 { left: 72px; animation: legA 0.24s ease-in-out infinite alternate; }
+
+    .request-btn {
+      border: 2px solid #ff78dd;
+      background: linear-gradient(180deg, rgba(73, 24, 64, 0.95), rgba(35, 13, 33, 0.95));
+      color: #ffd9f6;
+      font-size: clamp(15px, 2.5vw, 18px);
+      font-weight: 700;
+      padding: 12px 18px;
+      border-radius: 6px;
+      cursor: pointer;
+      box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.35), 0 0 16px rgba(255, 91, 210, 0.26);
+      transition: transform 140ms ease, filter 140ms ease, box-shadow 140ms ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .request-btn::after {
+      content: "";
+      position: absolute;
+      left: -40%;
+      right: -40%;
+      top: -120%;
+      bottom: -120%;
+      background: linear-gradient(100deg, rgba(255, 255, 255, 0) 35%, rgba(255, 189, 242, 0.35) 50%, rgba(255, 255, 255, 0) 65%);
+      transform: translateX(-50%);
+      animation: requestSweep 2.8s linear infinite;
+      pointer-events: none;
+    }
+
+    .request-btn:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.08);
+      box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.35), 0 0 20px rgba(255, 91, 210, 0.4);
+    }
+
+    .add-btn {
+      border: 2px solid #16f4d0;
+      background: linear-gradient(180deg, #131a1a, #090c0d);
+      color: #d8fff8;
+      font-size: clamp(16px, 2.7vw, 21px);
+      font-weight: 700;
+      padding: 12px 24px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: transform 140ms ease, filter 140ms ease, box-shadow 140ms ease;
+      box-shadow:
+        0 0 0 2px rgba(0, 0, 0, 0.45),
+        0 0 16px rgba(22, 244, 208, 0.35),
+        0 0 26px rgba(255, 79, 216, 0.2) inset;
+      position: relative;
+      overflow: hidden;
+      text-transform: uppercase;
+      isolation: isolate;
+      animation: btnIdleGlitch 1.15s steps(2, end) infinite, btnPulseGlow 1.1s ease-in-out infinite;
+    }
+
+    .add-btn .btn-label {
+      position: relative;
+      z-index: 2;
+      letter-spacing: 0.5px;
+      animation: btnTextFlicker 0.55s steps(2, end) infinite;
+    }
+
+    .add-btn::before,
+    .add-btn::after {
+      content: attr(data-text);
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      font-size: inherit;
+      font-weight: inherit;
+      pointer-events: none;
+      opacity: 0;
+      z-index: 3;
+      letter-spacing: 0.5px;
+    }
+
+    .add-btn::before {
+      color: #38ffd9;
+      text-shadow: -2px 0 #38ffd9, 0 0 8px rgba(56, 255, 217, 0.5);
+      animation: glitchLayerA 1s infinite steps(2, end);
+    }
+
+    .add-btn::after {
+      color: #ff5bd2;
+      text-shadow: 2px 0 #ff5bd2, 0 0 8px rgba(255, 91, 210, 0.5);
+      animation: glitchLayerB 1s infinite steps(2, end);
+    }
+
+    .add-btn .btn-label::after {
+      content: "";
+      position: absolute;
+      left: -12%;
+      right: -12%;
+      top: 0;
+      bottom: 0;
+      background: linear-gradient(100deg, rgba(0, 0, 0, 0) 36%, rgba(56, 255, 217, 0.36) 50%, rgba(0, 0, 0, 0) 64%);
+      pointer-events: none;
+      mix-blend-mode: screen;
+      animation: btnScanSweep 0.7s linear infinite;
+    }
+
+    .add-btn:disabled::before,
+    .add-btn:disabled::after {
+      display: none;
+    }
+
+    .add-btn:hover {
+      transform: translateY(-1px) skewX(-1deg);
+      filter: brightness(1.14) contrast(1.06);
+      box-shadow:
+        0 0 0 2px rgba(0, 0, 0, 0.45),
+        0 0 32px rgba(22, 244, 208, 0.68),
+        0 0 34px rgba(255, 91, 210, 0.42) inset;
+    }
+
+    .add-btn:active {
+      transform: translateY(1px);
+    }
+
+    .add-btn:disabled {
+      cursor: wait;
+      filter: saturate(0.5);
+      transform: none;
+      animation: none;
+    }
+
+    .add-btn:disabled .btn-label,
+    .add-btn:disabled .btn-label::after {
+      animation: none;
+    }
+
+    .status {
+      font-size: 13px;
+      color: var(--ok);
+      font-weight: 700;
+    }
+
+    .site-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      border: 1px solid rgba(137, 255, 213, 0.4);
+      border-radius: 6px;
+      background: rgba(10, 26, 20, 0.5);
+      font-family: Consolas, "Courier New", monospace;
+      letter-spacing: 0.2px;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--ok);
+      box-shadow: 0 0 10px rgba(137, 255, 213, 0.9);
+      flex: 0 0 auto;
+    }
+
+    .online-tag {
+      color: #9dffd6;
+      border: 1px solid rgba(137, 255, 213, 0.42);
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-size: 12px;
+      text-transform: uppercase;
+    }
+
+    .status.warn {
+      color: var(--danger);
+    }
+
+    .status.warn.site-status {
+      border-color: rgba(255, 126, 159, 0.55);
+      background: rgba(42, 14, 26, 0.52);
+    }
+
+    .status.warn .status-dot {
+      background: var(--danger);
+      box-shadow: 0 0 10px rgba(255, 126, 159, 0.9);
+    }
+
+    .status.warn .online-tag {
+      color: #ff9ab4;
+      border-color: rgba(255, 126, 159, 0.55);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .card {
+      border: 2px solid var(--line);
+      border-radius: 8px;
+      background: linear-gradient(180deg, rgba(28, 16, 31, 0.9), rgba(16, 10, 19, 0.9));
+      padding: 14px;
+      display: grid;
+      gap: 8px;
+      min-height: 116px;
+      box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.45) inset;
+      transition: transform 160ms ease, border-color 160ms ease;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(255, 155, 238, 0.65);
+    }
+
+    .card h3 {
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 700;
+      border-bottom: 1px dashed rgba(215, 162, 203, 0.42);
+      padding-bottom: 6px;
+    }
+
+    .value {
+      font-family: "VT323", monospace;
+      font-size: clamp(36px, 8vw, 58px);
+      font-weight: 400;
+      line-height: 1;
+      color: var(--pink-soft);
+      letter-spacing: 0.6px;
+      text-shadow: 0 0 10px rgba(255, 155, 238, 0.25);
+    }
+
+    .log-terminal {
+      margin-top: 14px;
+      border: 2px solid var(--line);
+      border-radius: 8px;
+      background: linear-gradient(180deg, rgba(8, 8, 8, 0.92), rgba(4, 4, 4, 0.94));
+      overflow: hidden;
+      box-shadow: 0 0 0 1px rgba(255, 79, 216, 0.14) inset;
+      position: relative;
+    }
+
+    .log-terminal::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: -35%;
+      height: 35%;
+      background: linear-gradient(180deg, rgba(255, 79, 216, 0), rgba(255, 79, 216, 0.16), rgba(255, 79, 216, 0));
+      pointer-events: none;
+      animation: terminalSweep 5s linear infinite;
+    }
+
+    .log-terminal-header {
+      font-family: "VT323", monospace;
+      font-size: 21px;
+      color: var(--pink-soft);
+      background: linear-gradient(180deg, rgba(39, 24, 38, 0.9), rgba(24, 14, 23, 0.92));
+      border-bottom: 1px solid var(--line);
+      padding: 6px 10px;
+      letter-spacing: 0.7px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .log-terminal-header::after {
+      content: "";
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      margin-inline-start: 8px;
+      border-radius: 999px;
+      background: var(--hot-pink);
+      box-shadow: 0 0 10px rgba(255, 79, 216, 0.9);
+      animation: pulseDot 1.15s ease-in-out infinite;
+    }
+
+    .log-terminal-body {
+      list-style: none;
+      padding: 10px 12px;
+      min-height: 140px;
+      max-height: 210px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      direction: ltr;
+      text-align: left;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 14px;
+      color: #f8c7ef;
+      scrollbar-width: thin;
+      scrollbar-color: #ff73dd rgba(20, 10, 20, 0.35);
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .log-terminal-body::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .log-terminal-body::-webkit-scrollbar-track {
+      background: rgba(20, 10, 20, 0.35);
+      border-radius: 999px;
+    }
+
+    .log-terminal-body::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg, #ff73dd, #b84da3);
+      border-radius: 999px;
+      border: 1px solid rgba(10, 6, 10, 0.45);
+    }
+
+    .log-terminal-body li {
+      white-space: normal;
+      word-break: break-word;
+      overflow: hidden;
+      display: block;
+      line-height: 1.25;
+      margin: 0;
+      padding: 1px 0;
+    }
+
+    .log-terminal-body li + li {
+      margin-top: 1px;
+    }
+
+    .log-terminal-body li::before {
+      content: "C:\\PONY> ";
+      color: var(--hot-pink);
+      font-weight: 700;
+    }
+
+    .log-pop {
+      animation: logEntryPop 430ms ease;
+    }
+
+    .custom-log {
+      margin-top: 12px;
+      border-color: #90518b;
+      box-shadow: 0 0 0 1px rgba(255, 130, 224, 0.2) inset;
+    }
+
+    .custom-log .log-terminal-header {
+      color: #ffd5f8;
+      background: linear-gradient(180deg, rgba(55, 28, 53, 0.9), rgba(28, 16, 29, 0.92));
+    }
+
+    .custom-log .log-terminal-body li::before {
+      content: "C:\\DICK> ";
+      color: #ff91e8;
+    }
+
+    .custom-log .log-terminal-body {
+      font-size: 15px;
+      direction: ltr;
+      text-align: left;
+      font-family: "Cairo", Consolas, "Courier New", monospace;
+    }
+
+    .custom-log .log-terminal-body li {
+      white-space: pre-wrap;
+      display: block;
+      overflow: visible;
+      unicode-bidi: isolate;
+    }
+
+    .powered-by {
+      margin-top: 12px;
+      text-align: center;
+      font-family: "VT323", monospace;
+      font-size: 22px;
+      letter-spacing: 1px;
+      color: #ffd5f7;
+      opacity: 0.92;
+      text-shadow: 0 0 12px rgba(255, 120, 221, 0.35);
+    }
+
+    .dialog-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(8, 4, 10, 0.78);
+      backdrop-filter: blur(3px);
+      display: grid;
+      place-items: center;
+      z-index: 20;
+      padding: 18px;
+    }
+
+    .dialog-overlay.hidden {
+      display: none;
+    }
+
+    .dialog-box {
+      width: min(560px, 100%);
+      border: 2px solid #9f4c92;
+      border-radius: 10px;
+      background: linear-gradient(180deg, rgba(24, 12, 27, 0.97), rgba(12, 7, 14, 0.97));
+      box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.45) inset, 0 0 24px rgba(255, 91, 210, 0.3);
+      padding: 14px;
+      animation: dialogIn 260ms ease;
+    }
+
+    .dialog-title {
+      font-family: "VT323", monospace;
+      font-size: 30px;
+      color: #ffc8f2;
+      margin-bottom: 8px;
+      letter-spacing: 1px;
+    }
+
+    .dialog-tip {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 10px;
+    }
+
+    .dialog-textarea {
+      width: 100%;
+      min-height: 140px;
+      resize: vertical;
+      border: 2px solid #75406e;
+      border-radius: 8px;
+      background: rgba(6, 6, 6, 0.8);
+      color: #ffe3fb;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 14px;
+      line-height: 1.45;
+      padding: 10px 12px;
+      outline: none;
+      transition: border-color 140ms ease, box-shadow 140ms ease;
+    }
+
+    .dialog-textarea:focus {
+      border-color: #ff7ce2;
+      box-shadow: 0 0 16px rgba(255, 91, 210, 0.26);
+    }
+
+    .dialog-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+
+    .dialog-btn {
+      border: 1px solid #96528d;
+      background: rgba(34, 16, 32, 0.9);
+      color: #ffd9f7;
+      font-size: 14px;
+      font-weight: 700;
+      padding: 9px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: transform 120ms ease, filter 120ms ease;
+    }
+
+    .dialog-btn:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.08);
+    }
+
+    .dialog-send {
+      border-color: #ff7ee0;
+      background: linear-gradient(180deg, #a93783, #6a1f54);
+      color: #fff3fd;
+      box-shadow: 0 0 14px rgba(255, 91, 210, 0.25);
+    }
+
+    @media (max-width: 860px) {
+      .stats-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 560px) {
+      .hud-bar {
+        left: 8px;
+        right: 8px;
+      }
+
+      .hero {
+        flex-direction: column;
+      }
+
+      .hero-head,
+      .total-hero {
+        width: 100%;
+      }
+
+      .total-hero {
+        transform: none;
+        clip-path: none;
+      }
+
+      .actions {
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .add-btn {
+        width: 100%;
+      }
+
+      .request-btn {
+        width: 100%;
+      }
+
+      .pony-dancer {
+        width: 92px;
+        height: 76px;
+        flex: 0 0 auto;
+        align-self: center;
+        margin: 8px auto 0;
+        margin-left: auto;
+        margin-right: auto;
+        display: block;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .log-terminal-body {
+        font-size: 13px;
+      }
+
+      .custom-log .log-terminal-body {
+        font-size: 14px;
+      }
+    }
+
+    @keyframes rise {
+      from {
+        opacity: 0;
+        transform: translateY(16px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes flicker {
+      0% { opacity: 0.99; }
+      2% { opacity: 0.95; }
+      4% { opacity: 0.99; }
+      35% { opacity: 0.98; }
+      36% { opacity: 0.94; }
+      37% { opacity: 0.99; }
+      100% { opacity: 0.99; }
+    }
+
+    @keyframes terminalSweep {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(420%); }
+    }
+
+    @keyframes pulseDot {
+      0% { opacity: 0.25; transform: scale(0.85); }
+      50% { opacity: 1; transform: scale(1.05); }
+      100% { opacity: 0.25; transform: scale(0.85); }
+    }
+
+    @keyframes logEntryPop {
+      0% { opacity: 0; transform: translateY(8px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes btnIdleGlitch {
+      0%, 64%, 100% { transform: translateX(0) skewX(0deg); }
+      65% { transform: translateX(-3px) skewX(-3deg); }
+      66% { transform: translateX(3px) skewX(2deg); }
+      67% { transform: translateX(-2px) skewX(-2deg); }
+      68% { transform: translateX(2px) skewX(1deg); }
+      69% { transform: translateX(0) skewX(0deg); }
+    }
+
+    @keyframes glitchLayerA {
+      0%, 40%, 100% { opacity: 0; transform: translate(0, 0); clip-path: inset(0 0 0 0); }
+      41% { opacity: 1; transform: translate(-3px, -1px); clip-path: inset(8% 0 70% 0); }
+      42% { opacity: 0.9; transform: translate(4px, 1px); clip-path: inset(48% 0 22% 0); }
+      43% { opacity: 0.85; transform: translate(-2px, 0); clip-path: inset(72% 0 5% 0); }
+      44% { opacity: 0.8; transform: translate(3px, -1px); clip-path: inset(20% 0 54% 0); }
+      45% { opacity: 0; transform: translate(0, 0); clip-path: inset(0 0 0 0); }
+    }
+
+    @keyframes glitchLayerB {
+      0%, 46%, 100% { opacity: 0; transform: translate(0, 0); clip-path: inset(0 0 0 0); }
+      47% { opacity: 0.95; transform: translate(3px, 1px); clip-path: inset(58% 0 12% 0); }
+      48% { opacity: 0.88; transform: translate(-3px, -1px); clip-path: inset(16% 0 57% 0); }
+      49% { opacity: 0.8; transform: translate(2px, 1px); clip-path: inset(36% 0 30% 0); }
+      50% { opacity: 0.76; transform: translate(-2px, 0); clip-path: inset(74% 0 4% 0); }
+      51% { opacity: 0; transform: translate(0, 0); clip-path: inset(0 0 0 0); }
+    }
+
+    @keyframes btnPulseGlow {
+      0%, 100% { box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.45), 0 0 18px rgba(22, 244, 208, 0.45), 0 0 28px rgba(255, 79, 216, 0.26) inset; }
+      50% { box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.45), 0 0 38px rgba(22, 244, 208, 0.84), 0 0 46px rgba(255, 79, 216, 0.52) inset; }
+    }
+
+    @keyframes btnTextFlicker {
+      0%, 100% { opacity: 1; }
+      8% { opacity: 0.78; }
+      9% { opacity: 1; }
+      14% { opacity: 0.62; }
+      15% { opacity: 1; }
+      27% { opacity: 0.8; }
+      28% { opacity: 1; }
+      49% { opacity: 0.7; }
+      50% { opacity: 1; }
+      63% { opacity: 0.76; }
+      64% { opacity: 1; }
+      78% { opacity: 0.68; }
+      79% { opacity: 1; }
+    }
+
+    @keyframes btnScanSweep {
+      0% { transform: translateX(-135%); }
+      100% { transform: translateX(135%); }
+    }
+
+    @keyframes requestSweep {
+      0% { transform: translateX(-70%); }
+      100% { transform: translateX(70%); }
+    }
+
+    @keyframes dialogIn {
+      from { opacity: 0; transform: translateY(10px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    @keyframes ponyDance {
+      0% { transform: translateY(0) rotate(0deg) scale(1); }
+      15% { transform: translateY(-5px) rotate(-6deg) scale(1.03); }
+      35% { transform: translateY(1px) rotate(4deg) scale(0.99); }
+      50% { transform: translateY(-6px) rotate(-3deg) scale(1.04); }
+      70% { transform: translateY(2px) rotate(6deg) scale(0.98); }
+      85% { transform: translateY(-4px) rotate(-4deg) scale(1.02); }
+      100% { transform: translateY(0) rotate(0deg) scale(1); }
+    }
+
+    @keyframes legA {
+      from { transform: rotate(-22deg); }
+      to { transform: rotate(24deg); }
+    }
+
+    @keyframes legB {
+      from { transform: rotate(24deg); }
+      to { transform: rotate(-22deg); }
+    }
+
+    @keyframes tailWag {
+      from { transform: rotate(-36deg); }
+      to { transform: rotate(30deg); }
+    }
+  </style>
+</head>
+<body>
+  <main class="app" aria-label="لوحة إحصائيات بوني">
+    <div class="hud-bar">
+      <p class="status site-status" id="statusMessage" aria-live="polite">
+        <span class="status-dot" aria-hidden="true"></span>
+        <span id="statusText">جاري التحميل...</span>
+        <span class="online-tag" id="statusState">ONLINE</span>
+      </p>
+      <p class="terminal-chip">PONY DICKKER</p>
+    </div>
+
+    <div class="hero">
+      <div class="hero-head">
+        <div class="actions">
+          <button class="add-btn" id="addBtn" type="button" data-text="إضافة عير لبوني"><span class="btn-label">إضافة عير لبوني</span></button>
+          <button class="request-btn" id="customRequestBtn" type="button">عير مخصص</button>
+          <div class="pony-dancer" aria-hidden="true">
+            <div class="pony-tail"></div>
+            <div class="pony-body"></div>
+            <div class="pony-head"></div>
+            <div class="pony-ear"></div>
+            <div class="pony-mane"></div>
+            <span class="pony-leg l1"></span>
+            <span class="pony-leg l2"></span>
+            <span class="pony-leg l3"></span>
+            <span class="pony-leg l4"></span>
+          </div>
+        </div>
+      </div>
+
+      <article class="card total-hero">
+        <h3>إجمالي العيوره</h3>
+        <p class="value" id="addsTotal">0</p>
+      </article>
+    </div>
+
+    <section class="stats-grid" aria-label="إحصائيات الإضافات">
+      <article class="card">
+        <h3>العيوره اليوم</h3>
+        <p class="value" id="addsToday">0</p>
+      </article>
+      <article class="card">
+        <h3>العيوره هذا الأسبوع</h3>
+        <p class="value" id="addsWeek">0</p>
+      </article>
+      <article class="card">
+        <h3>العيوره الشهر الماضي</h3>
+        <p class="value" id="addsPrevMonth">0</p>
+      </article>
+    </section>
+
+    <section class="log-terminal" aria-label="سجل آخر الإضافات">
+      <h2 class="log-terminal-header">LAST DICK ADDED LOG</h2>
+      <ul class="log-terminal-body" id="logTerminalBody"></ul>
+    </section>
+
+    <section class="log-terminal custom-log" aria-label="سجل الطلبات المخصصة">
+      <h2 class="log-terminal-header">CUSTOM DICK LOG</h2>
+      <ul class="log-terminal-body" id="customLogBody"></ul>
+    </section>
+
+    <p class="powered-by">Powered by Zeus</p>
+
+  </main>
+
+  <div class="dialog-overlay hidden" id="customDialog" aria-hidden="true">
+    <div class="dialog-box" role="dialog" aria-modal="true" aria-labelledby="customDialogTitle">
+      <h2 class="dialog-title" id="customDialogTitle">CUSTOM DICK</h2>
+      <p class="dialog-tip">اكتب رسالتك يامنيوج وراح تطلع بالصفحة الرئيسية</p>
+      <textarea class="dialog-textarea" id="customMessageInput" maxlength="280" placeholder="اكتب طلبك المخصص هنا..."></textarea>
+      <div class="dialog-actions">
+        <button class="dialog-btn" id="closeCustomDialogBtn" type="button">الغي العير</button>
+        <button class="dialog-btn dialog-send" id="sendCustomBtn" type="button">دز العير</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = "https://api.countapi.xyz";
+    const NAMESPACE = "pony_modh8_live_stats";
+    const MESSAGES_API = "/api/messages";
+
+    const addsTotalEl = document.getElementById("addsTotal");
+    const addsTodayEl = document.getElementById("addsToday");
+    const addsWeekEl = document.getElementById("addsWeek");
+    const addsPrevMonthEl = document.getElementById("addsPrevMonth");
+    const addBtn = document.getElementById("addBtn");
+    const customRequestBtn = document.getElementById("customRequestBtn");
+    const statusMessage = document.getElementById("statusMessage");
+    const statusText = document.getElementById("statusText");
+    const statusState = document.getElementById("statusState");
+    const logTerminalBody = document.getElementById("logTerminalBody");
+    const customLogBody = document.getElementById("customLogBody");
+    const customDialog = document.getElementById("customDialog");
+    const customMessageInput = document.getElementById("customMessageInput");
+    const closeCustomDialogBtn = document.getElementById("closeCustomDialogBtn");
+    const sendCustomBtn = document.getElementById("sendCustomBtn");
+    const MAX_LOG_ITEMS = 30;
+
+    let additionLogs = [];
+    let customLogs = [];
+
+    let audioCtx = null;
+    let ambientStarted = false;
+    let ambientNodes = [];
+
+    const getAudioCtx = () => {
+      if (!audioCtx) {
+        const Ctx = window.AudioContext || window.webkitAudioContext;
+        if (!Ctx) return null;
+        audioCtx = new Ctx();
+      }
+
+      if (audioCtx.state === "suspended") {
+        audioCtx.resume().catch(() => {});
+      }
+
+      return audioCtx;
+    };
+
+    const startRetroAmbient = async () => {
+      if (ambientStarted) return;
+
+      const ctx = getAudioCtx();
+      if (!ctx) return;
+
+      if (ctx.state === "suspended") {
+        try {
+          await ctx.resume();
+        } catch (error) {
+          return;
+        }
+      }
+
+      const now = ctx.currentTime;
+      const compressor = ctx.createDynamicsCompressor();
+      compressor.threshold.setValueAtTime(-28, now);
+      compressor.knee.setValueAtTime(20, now);
+      compressor.ratio.setValueAtTime(3, now);
+      compressor.attack.setValueAtTime(0.01, now);
+      compressor.release.setValueAtTime(0.25, now);
+
+      const master = ctx.createGain();
+      master.gain.setValueAtTime(0.0001, now);
+      master.gain.exponentialRampToValueAtTime(0.105, now + 1.2);
+      master.connect(compressor);
+      compressor.connect(ctx.destination);
+
+      const noiseBuffer = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
+      const noiseData = noiseBuffer.getChannelData(0);
+      for (let i = 0; i < noiseData.length; i += 1) {
+        noiseData[i] = (Math.random() * 2 - 1) * 0.18;
+      }
+
+      const noise = ctx.createBufferSource();
+      noise.buffer = noiseBuffer;
+      noise.loop = true;
+
+      const noiseLow = ctx.createBiquadFilter();
+      noiseLow.type = "lowpass";
+      noiseLow.frequency.setValueAtTime(860, now);
+
+      const noiseHigh = ctx.createBiquadFilter();
+      noiseHigh.type = "highpass";
+      noiseHigh.frequency.setValueAtTime(130, now);
+
+      const noiseBand = ctx.createBiquadFilter();
+      noiseBand.type = "bandpass";
+      noiseBand.frequency.setValueAtTime(420, now);
+      noiseBand.Q.value = 0.7;
+
+      const noiseGain = ctx.createGain();
+      noiseGain.gain.setValueAtTime(0.039, now);
+
+      const droneA = ctx.createOscillator();
+      droneA.type = "triangle";
+      droneA.frequency.setValueAtTime(64, now);
+
+      const droneB = ctx.createOscillator();
+      droneB.type = "sawtooth";
+      droneB.frequency.setValueAtTime(96, now);
+      droneB.detune.setValueAtTime(4, now);
+
+      const droneC = ctx.createOscillator();
+      droneC.type = "sine";
+      droneC.frequency.setValueAtTime(128, now);
+
+      const droneGainA = ctx.createGain();
+      droneGainA.gain.setValueAtTime(0.03, now);
+
+      const droneGainB = ctx.createGain();
+      droneGainB.gain.setValueAtTime(0.024, now);
+
+      const droneGainC = ctx.createGain();
+      droneGainC.gain.setValueAtTime(0.017, now);
+
+      const droneLP = ctx.createBiquadFilter();
+      droneLP.type = "lowpass";
+      droneLP.frequency.setValueAtTime(980, now);
+
+      const wobble = ctx.createOscillator();
+      wobble.type = "sine";
+      wobble.frequency.setValueAtTime(0.085, now);
+
+      const wobbleGain = ctx.createGain();
+      wobbleGain.gain.setValueAtTime(180, now);
+
+      const droneWobbleGain = ctx.createGain();
+      droneWobbleGain.gain.setValueAtTime(9, now);
+
+      const shimmer = ctx.createOscillator();
+      shimmer.type = "triangle";
+      shimmer.frequency.setValueAtTime(0.24, now);
+
+      const shimmerGain = ctx.createGain();
+      shimmerGain.gain.setValueAtTime(0.012, now);
+
+      const shimmerVCAGain = ctx.createGain();
+      shimmerVCAGain.gain.setValueAtTime(0.01, now);
+
+      const shimmerTone = ctx.createOscillator();
+      shimmerTone.type = "sine";
+      shimmerTone.frequency.setValueAtTime(420, now);
+
+      const shimmerHP = ctx.createBiquadFilter();
+      shimmerHP.type = "highpass";
+      shimmerHP.frequency.setValueAtTime(260, now);
+
+      wobble.connect(wobbleGain);
+      wobbleGain.connect(noiseLow.frequency);
+      wobbleGain.connect(droneLP.frequency);
+
+      wobble.connect(droneWobbleGain);
+      droneWobbleGain.connect(droneA.frequency);
+
+      shimmer.connect(shimmerGain);
+      shimmerGain.connect(shimmerVCAGain.gain);
+
+      noise.connect(noiseLow);
+      noiseLow.connect(noiseHigh);
+      noiseHigh.connect(noiseBand);
+      noiseBand.connect(noiseGain);
+      noiseGain.connect(master);
+
+      droneA.connect(droneGainA);
+      droneB.connect(droneGainB);
+      droneC.connect(droneGainC);
+
+      droneGainA.connect(droneLP);
+      droneGainB.connect(droneLP);
+      droneGainC.connect(droneLP);
+      droneLP.connect(master);
+
+      shimmerTone.connect(shimmerVCAGain);
+      shimmerVCAGain.connect(shimmerHP);
+      shimmerHP.connect(master);
+
+      noise.start(now);
+      droneA.start(now);
+      droneB.start(now);
+      droneC.start(now);
+      wobble.start(now);
+      shimmer.start(now);
+      shimmerTone.start(now);
+
+      ambientNodes = [
+        noise,
+        droneA,
+        droneB,
+        droneC,
+        wobble,
+        shimmer,
+        shimmerTone,
+        master,
+        compressor,
+        noiseLow,
+        noiseHigh,
+        noiseBand,
+        noiseGain,
+        droneGainA,
+        droneGainB,
+        droneGainC,
+        droneLP,
+        wobbleGain,
+        droneWobbleGain,
+        shimmerGain,
+        shimmerVCAGain,
+        shimmerHP
+      ];
+      ambientStarted = true;
+    };
+
+    const armAmbientStart = () => {
+      const tryStart = async () => {
+        await startRetroAmbient();
+        window.removeEventListener("pointerdown", tryStart);
+        window.removeEventListener("keydown", tryStart);
+      };
+
+      window.addEventListener("pointerdown", tryStart, { passive: true });
+      window.addEventListener("keydown", tryStart);
+    };
+
+    const playRetroClick = () => {
+      startRetroAmbient();
+
+      const ctx = getAudioCtx();
+      if (!ctx) return;
+
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      const filter = ctx.createBiquadFilter();
+
+      osc.type = "square";
+      osc.frequency.setValueAtTime(980, now);
+      osc.frequency.exponentialRampToValueAtTime(220, now + 0.07);
+
+      filter.type = "lowpass";
+      filter.frequency.setValueAtTime(1700, now);
+      filter.Q.value = 7;
+
+      gain.gain.setValueAtTime(0.0001, now);
+      gain.gain.exponentialRampToValueAtTime(0.08, now + 0.006);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.085);
+
+      osc.connect(filter);
+      filter.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(now);
+      osc.stop(now + 0.09);
+    };
+
+    const playRetroSend = () => {
+      const ctx = getAudioCtx();
+      if (!ctx) return;
+
+      const now = ctx.currentTime;
+
+      const carrier = ctx.createOscillator();
+      const mod = ctx.createOscillator();
+      const modGain = ctx.createGain();
+      const mainGain = ctx.createGain();
+      const hp = ctx.createBiquadFilter();
+
+      carrier.type = "sawtooth";
+      carrier.frequency.setValueAtTime(190, now);
+      carrier.frequency.exponentialRampToValueAtTime(490, now + 0.16);
+      carrier.frequency.exponentialRampToValueAtTime(290, now + 0.26);
+
+      mod.type = "triangle";
+      mod.frequency.setValueAtTime(34, now);
+      modGain.gain.setValueAtTime(36, now);
+
+      hp.type = "highpass";
+      hp.frequency.value = 120;
+
+      mainGain.gain.setValueAtTime(0.0001, now);
+      mainGain.gain.exponentialRampToValueAtTime(0.09, now + 0.02);
+      mainGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.32);
+
+      mod.connect(modGain);
+      modGain.connect(carrier.frequency);
+      carrier.connect(hp);
+      hp.connect(mainGain);
+      mainGain.connect(ctx.destination);
+
+      carrier.start(now);
+      mod.start(now);
+      carrier.stop(now + 0.33);
+      mod.stop(now + 0.33);
+    };
+
+    const bindButtonClickSounds = () => {
+      document.querySelectorAll("button").forEach((button) => {
+        button.addEventListener("click", () => {
+          playRetroClick();
+        });
+      });
+    };
+
+    const formatDateKey = (date) => {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, "0");
+      const d = String(date.getDate()).padStart(2, "0");
+      return `${y}-${m}-${d}`;
+    };
+
+    const formatMonthKey = (date) => {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, "0");
+      return `${y}-${m}`;
+    };
+
+    const getISOWeekKey = (date) => {
+      const tmp = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+      const dayNum = tmp.getUTCDay() || 7;
+      tmp.setUTCDate(tmp.getUTCDate() + 4 - dayNum);
+      const yearStart = new Date(Date.UTC(tmp.getUTCFullYear(), 0, 1));
+      const weekNo = Math.ceil((((tmp - yearStart) / 86400000) + 1) / 7);
+      return `${tmp.getUTCFullYear()}-W${String(weekNo).padStart(2, "0")}`;
+    };
+
+    const getPrevMonthDate = () => {
+      const now = new Date();
+      return new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    };
+
+    const keyMap = () => {
+      const now = new Date();
+      return {
+        addsTotal: "adds_total",
+        addsToday: `adds_day_${formatDateKey(now)}`,
+        addsWeek: `adds_week_${getISOWeekKey(now)}`,
+        addsMonth: `adds_month_${formatMonthKey(now)}`,
+        addsPrevMonth: `adds_month_${formatMonthKey(getPrevMonthDate())}`
+      };
+    };
+
+    const setStatus = (text, warning) => {
+      if (!statusMessage) return;
+      if (statusText) {
+        statusText.textContent = text;
+      }
+      if (statusState) {
+        statusState.textContent = warning ? "OFFLINE" : "ONLINE";
+      }
+      statusMessage.classList.toggle("warn", Boolean(warning));
+    };
+
+    const readCounterValue = (element) => {
+      if (!element) return 0;
+      const parsed = Number.parseInt((element.textContent || "").replace(/[^0-9]/g, ""), 10);
+      return Number.isFinite(parsed) ? parsed : 0;
+    };
+
+    const rollCounterTo = (element, target, duration) => {
+      if (!element) return;
+
+      const safeTarget = Number.isFinite(target) ? Math.max(0, Math.floor(target)) : 0;
+      const start = readCounterValue(element);
+
+      if (start === safeTarget) {
+        element.textContent = String(safeTarget);
+        return;
+      }
+
+      const startTime = performance.now();
+      const totalDuration = duration || 700;
+
+      const tick = (now) => {
+        const progress = Math.min(1, (now - startTime) / totalDuration);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        const value = Math.round(start + (safeTarget - start) * eased);
+        element.textContent = String(value);
+
+        if (progress < 1) {
+          requestAnimationFrame(tick);
+        }
+      };
+
+      requestAnimationFrame(tick);
+    };
+
+    const formatAbsoluteTimestamp = (date) => {
+      const timePart = new Intl.DateTimeFormat("en-US", {
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true
+      }).format(date);
+
+      const datePart = new Intl.DateTimeFormat("en-GB", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric"
+      }).format(date);
+
+      return `added by anonymous in ${timePart} - ${datePart}`;
+    };
+
+    const formatLogText = (entryTs) => {
+      const now = Date.now();
+      const diffMs = Math.max(0, now - entryTs);
+      const diffMinutes = Math.floor(diffMs / 60000);
+
+      if (diffMinutes < 60) {
+        return "added by anonymous last a few minutes";
+      }
+
+      if (diffMinutes < 180) {
+        return "added by anonymous last two hours";
+      }
+
+      if (diffMinutes < 1440) {
+        const hours = Math.max(2, Math.floor(diffMinutes / 60));
+        return `added by anonymous last ${hours} hours`;
+      }
+
+      return formatAbsoluteTimestamp(new Date(entryTs));
+    };
+
+    const normalizeAdditionLogs = (items) => {
+      if (!Array.isArray(items)) return [];
+      return items
+        .map((item) => {
+          if (item && typeof item === "object" && typeof item.ts === "number") {
+            return { ts: item.ts };
+          }
+          return null;
+        })
+        .filter(Boolean);
+    };
+
+    const normalizeCustomLogs = (items) => {
+      if (!Array.isArray(items)) return [];
+      return items
+        .map((item) => {
+          if (item && typeof item === "object" && typeof item.message === "string") {
+            return { message: item.message, ts: Number(item.ts) || Date.now() };
+          }
+          return null;
+        })
+        .filter(Boolean);
+    };
+
+    const fetchLogsFromServer = async () => {
+      try {
+        const res = await fetch(MESSAGES_API, { cache: "no-store" });
+        if (!res.ok) {
+          return false;
+        }
+
+        const data = await res.json();
+        additionLogs = normalizeAdditionLogs(data.additionLogs);
+        customLogs = normalizeCustomLogs(data.customLogs);
+        return true;
+      } catch (error) {
+        return false;
+      }
+    };
+
+    const postLogToServer = async (payload) => {
+      try {
+        const res = await fetch(MESSAGES_API, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          return null;
+        }
+
+        const data = await res.json();
+        return data.entry || null;
+      } catch (error) {
+        return null;
+      }
+    };
+
+    const escapeHtml = (value) => value
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/\"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+
+    const renderLogItems = (items, animateLatest) => {
+      if (!logTerminalBody) return;
+
+      if (!items.length) {
+        logTerminalBody.innerHTML = "<li>awaiting additions...</li>";
+        return;
+      }
+
+      logTerminalBody.innerHTML = items.map((item, index) => {
+        const text = item.ts ? formatLogText(item.ts) : item.legacy;
+        const cls = animateLatest && index === 0 ? " class=\"log-pop\"" : "";
+        return `<li${cls}>${text}</li>`;
+      }).join("");
+    };
+
+    const formatCustomLogText = (item) => {
+      if (item.legacy) {
+        return item.legacy;
+      }
+
+      return item.message;
+    };
+
+    const renderCustomLogItems = (items, animateLatest) => {
+      if (!customLogBody) return;
+
+      if (!items.length) {
+        customLogBody.innerHTML = "<li>awaiting custom requests...</li>";
+        return;
+      }
+
+      customLogBody.innerHTML = items.map((item, index) => {
+        const text = escapeHtml(formatCustomLogText(item));
+        const cls = animateLatest && index === 0 ? " class=\"log-pop\"" : "";
+        return `<li${cls}>${text}</li>`;
+      }).join("");
+    };
+
+    const pushLogItem = (entry) => {
+      const normalizedEntry = entry && typeof entry.ts === "number" ? { ts: entry.ts } : { ts: Date.now() };
+      additionLogs.unshift(normalizedEntry);
+      additionLogs = additionLogs.slice(0, 800);
+      renderLogItems(additionLogs.slice(0, MAX_LOG_ITEMS), true);
+    };
+
+    const pushCustomLogItem = (entry) => {
+      const normalizedEntry = entry && typeof entry.message === "string"
+        ? { message: entry.message, ts: Number(entry.ts) || Date.now() }
+        : null;
+
+      if (!normalizedEntry) return;
+
+      customLogs.unshift(normalizedEntry);
+      renderCustomLogItems(customLogs, true);
+    };
+
+    const openCustomDialog = () => {
+      if (!customDialog) return;
+      customDialog.classList.remove("hidden");
+      customDialog.setAttribute("aria-hidden", "false");
+      if (customMessageInput) {
+        customMessageInput.focus();
+      }
+    };
+
+    const closeCustomDialog = () => {
+      if (!customDialog) return;
+      customDialog.classList.add("hidden");
+      customDialog.setAttribute("aria-hidden", "true");
+    };
+
+    const getCounter = async (key) => {
+      try {
+        const res = await fetch(`${API_BASE}/get/${NAMESPACE}/${key}`);
+        if (!res.ok) {
+          return 0;
+        }
+        const data = await res.json();
+        return Number.isFinite(data.value) ? data.value : 0;
+      } catch (error) {
+        return 0;
+      }
+    };
+
+    const hitCounter = async (key) => {
+      const res = await fetch(`${API_BASE}/hit/${NAMESPACE}/${key}`);
+      if (!res.ok) {
+        throw new Error("counter_hit_failed");
+      }
+      const data = await res.json();
+      return Number.isFinite(data.value) ? data.value : 0;
+    };
+
+    const refreshAddStats = async () => {
+      const keys = keyMap();
+      const [addsTotal, addsToday, addsWeek, addsPrevMonth] = await Promise.all([
+        getCounter(keys.addsTotal),
+        getCounter(keys.addsToday),
+        getCounter(keys.addsWeek),
+        getCounter(keys.addsPrevMonth)
+      ]);
+
+      rollCounterTo(addsTotalEl, addsTotal, 820);
+      rollCounterTo(addsTodayEl, addsToday, 720);
+      rollCounterTo(addsWeekEl, addsWeek, 780);
+      rollCounterTo(addsPrevMonthEl, addsPrevMonth, 860);
+    };
+
+    const init = async () => {
+      setStatus("جاري تحميل الإحصائيات...");
+      const loaded = await fetchLogsFromServer();
+      if (!loaded) {
+        setStatus("فشل", true);
+      }
+      renderLogItems(additionLogs.slice(0, MAX_LOG_ITEMS), false);
+      renderCustomLogItems(customLogs, false);
+      try {
+        await refreshAddStats();
+        setStatus("Online");
+      } catch (error) {
+        setStatus("فشل", true);
+      }
+    };
+
+    setInterval(async () => {
+      const loaded = await fetchLogsFromServer();
+      if (loaded) {
+        renderLogItems(additionLogs.slice(0, MAX_LOG_ITEMS), false);
+        renderCustomLogItems(customLogs, false);
+      }
+    }, 15000);
+
+    if (customRequestBtn) {
+      customRequestBtn.addEventListener("click", openCustomDialog);
+    }
+
+    if (closeCustomDialogBtn) {
+      closeCustomDialogBtn.addEventListener("click", closeCustomDialog);
+    }
+
+    if (customDialog) {
+      customDialog.addEventListener("click", (event) => {
+        if (event.target === customDialog) {
+          closeCustomDialog();
+        }
+      });
+    }
+
+    if (sendCustomBtn) {
+      sendCustomBtn.addEventListener("click", async () => {
+        const message = customMessageInput ? customMessageInput.value.trim() : "";
+        if (!message) {
+          setStatus("عير طويل", true);
+          if (customMessageInput) {
+            customMessageInput.focus();
+          }
+          return;
+        }
+
+        const entry = await postLogToServer({ type: "custom", message });
+        if (entry) {
+          pushCustomLogItem(entry);
+          playRetroSend();
+        } else {
+          setStatus("فشل", true);
+          return;
+        }
+        if (customMessageInput) {
+          customMessageInput.value = "";
+        }
+        closeCustomDialog();
+      });
+    }
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        closeCustomDialog();
+      }
+    });
+
+    addBtn.addEventListener("click", async () => {
+      const keys = keyMap();
+      addBtn.disabled = true;
+      setStatus("عيرك بالطريق");
+
+      try {
+        const [addsTotal, addsToday, addsWeek] = await Promise.all([
+          hitCounter(keys.addsTotal),
+          hitCounter(keys.addsToday),
+          hitCounter(keys.addsWeek)
+        ]);
+
+        // Keeps current-month data available for future month-over-month analytics.
+        await hitCounter(keys.addsMonth);
+
+        rollCounterTo(addsTotalEl, addsTotal, 600);
+        rollCounterTo(addsTodayEl, addsToday, 520);
+        rollCounterTo(addsWeekEl, addsWeek, 560);
+        const entry = await postLogToServer({ type: "addition" });
+        pushLogItem(entry || { ts: Date.now() });
+        playRetroSend();
+        setStatus("عيرك وصل");
+      } catch (error) {
+        setStatus("فشل", true);
+      } finally {
+        addBtn.disabled = false;
+      }
+    });
+
+    armAmbientStart();
+    bindButtonClickSounds();
+    init();
+  </script>
+</body>
+</html>
